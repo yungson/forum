@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--设置xmlns:th="http://www.thymeleaf.org"说明这是个动态的html模版，不是普通的html-->
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher</title>
+</head>
+<body>
+<!--标识<p>段落里面的text来源于model中的name属性-->
+<p th:text="${name}"></p>
+<p th:text="${age}"></p>
+</body>
+</html>

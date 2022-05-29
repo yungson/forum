@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a Student</title>
+</head>
+<body>
+
+<!--
+action 代表提交路径
+浏览器访问static目录下的资源可以通过：localhost:8080/forum/html/student.html, 也就是说static不用包含在路径里
+-->
+    <form method="post" action="/forum/alpha/student">
+        <p>
+            Name: <input type="text" name="name">
+        </p>
+        <p>
+            Age: <input type="text" name="age">
+        </p>
+        <p>
+            <input type="submit" value="submit">
+        </p>
+
+    </form>
+
+</body>
+</html>
