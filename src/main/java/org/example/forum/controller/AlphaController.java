@@ -1,14 +1,17 @@
 package org.example.forum.controller;
 
 import org.example.forum.service.AlphaService;
+import org.example.forum.util.ForumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -143,6 +146,44 @@ public class AlphaController {
         return list;
     }
     //5. 还可以响应其他很多种数据
+
+    //6.cookie示例
+
+    @RequestMapping(path="/cookie/set", method =RequestMethod.GET )
+    @ResponseBody
+    public String setCookie(HttpServletResponse response){
+        Cookie cookie = new Cookie("code", ForumUtil.generateUUID());
+        cookie.setPath("/forum/alpha");
+        cookie.setMaxAge(60*10);
+        response.addCookie(cookie);
+        return "set cookie";
+    }
+
+    // 其他请求就会带上这个cookie
+    @RequestMapping(path="cookie/get", method = RequestMethod.GET)
+    @ResponseBody
+    public String getCookie(@CookieValue("code") String code){
+        System.out.println("code = " + code);
+        return "get cookie";
+    }
+
+    //session example
+    @RequestMapping(path = "/session/set", method=RequestMethod.GET)
+    @ResponseBody
+    public String setSession(HttpSession session){
+        session.setAttribute("id", 1);
+        session.setAttribute("name", "Test");
+        return "set session";
+    }
+
+    // 下次访问就可以获取对应请求中的sessionId,然后对应相应的session
+    @RequestMapping(path = "/session/get", method=RequestMethod.GET)
+    @ResponseBody
+    public String getSession(HttpSession session){
+        System.out.println(session.getAttribute("id"));
+        System.out.println(session.getAttribute("name"));
+        return "get session";
+    }
 }
 
 
