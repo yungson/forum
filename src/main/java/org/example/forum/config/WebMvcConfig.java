@@ -1,6 +1,7 @@
 package org.example.forum.config;
 
 import org.example.forum.controller.interceptor.AlphaInterCeptor;
+import org.example.forum.controller.interceptor.LoginRequiredInterceptor;
 import org.example.forum.controller.interceptor.LoginTicketInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     LoginTicketInterceptor loginTicketInterceptor;
 
+    @Autowired
+    LoginRequiredInterceptor loginRequiredInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(alphaInterCeptor)
@@ -29,5 +33,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg"); //静态资源不需要拦截，**排除掉所有目录的css
         // loginTicketInterceptor我们设置拦截所有请求
 
+        registry.addInterceptor(loginRequiredInterceptor)
+                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg");
     }
 }

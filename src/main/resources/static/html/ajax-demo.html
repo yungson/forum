@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <p><input type="button" value="发送" onclick="send();"></p>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script>
+        function send() {
+            $.post(
+                "/forum/alpha/ajax",
+                {"name":"zhangsan", "age":23},
+                function(data){ //匿名回调函数，在服务器给浏览器做出响应之后会调用此方法，其中data是服务器返回给浏览器的数据
+                    console.log(typeof(data));
+                    console.log(data);
+                    data = $.parseJSON(data);
+                    console.log(typeof(data));
+                    console.log(data.code);
+                    console.log(data.msg);
+                }
+            )
+        }
+    </script>
+</body>
+</html>
