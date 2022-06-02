@@ -107,6 +107,5 @@ public class AlphaService {
                 return null;
             }
         });
-
     }
 }

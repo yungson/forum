@@ -6,6 +6,7 @@ import org.example.forum.entity.Page;
 import org.example.forum.entity.User;
 import org.example.forum.service.CommentService;
 import org.example.forum.service.DiscussPostService;
+import org.example.forum.service.LikeService;
 import org.example.forum.service.UserService;
 import org.example.forum.util.ForumConstant;
 import org.example.forum.util.ForumUtil;
@@ -36,6 +37,9 @@ public class DiscussPostController implements ForumConstant {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private LikeService likeService;
+
     @RequestMapping(path = "/add",method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(String title, String content){
@@ -61,6 +65,11 @@ public class DiscussPostController implements ForumConstant {
         User user = userService.findUserById(post.getUserId());
         model.addAttribute("user", user);
 
+        long likeCount = likeService.findEntityLikeCount(ForumConstant.ENTITY_TYPE_POST, post.getId());
+        model.addAttribute("likeCount", likeCount);
+        int likeStatus = hostHolder.getUser() == null? 0:likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ForumConstant.ENTITY_TYPE_POST, post.getId());
+        model.addAttribute("likeStatus", likeStatus);
+
         //评论comment: 给帖子的评论
         // 回复reply: 给comment的回复
         // 评论分页信息
@@ -71,9 +80,17 @@ public class DiscussPostController implements ForumConstant {
         List<Map<String, Object>> commentVoList = new ArrayList<>();
         if(commentList!=null){
             for(Comment comment:commentList){
+                // 评论vo
                 Map<String, Object> commentVo = new HashMap<>(); // Vo: View Object
+                // 评论
                 commentVo.put("comment", comment);
+                // 作者
                 commentVo.put("user", userService.findUserById(comment.getUserId()));
+                // 点赞数量
+                likeCount = likeService.findEntityLikeCount(ForumConstant.ENTITY_TYPE_COMMENT, comment.getId());
+                likeStatus = hostHolder.getUser() == null? 0:likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ForumConstant.ENTITY_TYPE_COMMENT, comment.getId());
+                commentVo.put("likeCount", likeCount);
+                commentVo.put("likeStatus", likeStatus);
                 // reply list
                 List<Comment> replyList = commentService.findCommentsByEntity(ENTITY_TYPE_COMMENT, comment.getId(),0, Integer.MAX_VALUE);
                 // View Object list for replies
@@ -85,6 +102,10 @@ public class DiscussPostController implements ForumConstant {
                         replyVo.put("user", userService.findUserById(reply.getUserId()));
                         User target = reply.getTargetId() == 0 ? null: userService.findUserById(reply.getTargetId());
                         replyVo.put("target", target);
+                        likeCount = likeService.findEntityLikeCount(ForumConstant.ENTITY_TYPE_COMMENT, reply.getId());
+                        likeStatus = hostHolder.getUser() == null? 0:likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ForumConstant.ENTITY_TYPE_COMMENT, reply.getId());
+                        replyVo.put("likeCount", likeCount);
+                        replyVo.put("likeStatus", likeStatus);
                         replyVoList.add(replyVo);
                     }
                 }
@@ -97,6 +118,7 @@ public class DiscussPostController implements ForumConstant {
             }
         }
         model.addAttribute("comments", commentVoList);
+
 
         return "/site/discuss-detail";
     }

@@ -3,6 +3,7 @@ package org.example.forum.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.example.forum.annotation.LoginRequired;
 import org.example.forum.entity.User;
+import org.example.forum.service.LikeService;
 import org.example.forum.service.UserService;
 import org.example.forum.util.ForumUtil;
 import org.example.forum.util.HostHolder;
@@ -43,6 +44,9 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
 
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     @LoginRequired
@@ -125,5 +129,17 @@ public class UserController {
         } catch(IOException e){
             logger.error("获取头像失败:"+e.getMessage());
         }
+    }
+
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model){
+        User user = userService.findUserById(userId);
+        if (user==null){
+            throw new RuntimeException("User does not exist");
+        }
+        model.addAttribute("user", user);
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+        return "/site/profile";
     }
 }

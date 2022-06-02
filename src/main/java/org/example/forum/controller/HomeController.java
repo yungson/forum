@@ -4,7 +4,9 @@ import org.example.forum.entity.DiscussPost;
 import org.example.forum.entity.Page;
 import org.example.forum.entity.User;
 import org.example.forum.service.DiscussPostService;
+import org.example.forum.service.LikeService;
 import org.example.forum.service.UserService;
+import org.example.forum.util.ForumConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +27,9 @@ public class HomeController {
     @Autowired
     private DiscussPostService discussPostService;
 
+    @Autowired
+    private LikeService likeService;
+
     @RequestMapping(path="/index", method= RequestMethod.GET)
     public String getIndexPage(Model model, Page page){
         page.setRows(discussPostService.findDiscussPostRows(0));
@@ -38,6 +43,8 @@ public class HomeController {
                 map.put("post", post);
                 User user = userService.findUserById(post.getUserId());
                 map.put("user", user);
+                long likeCount = likeService.findEntityLikeCount(ForumConstant.ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
                 discussPosts.add(map);
             }
         }
@@ -45,5 +52,11 @@ public class HomeController {
         // 如果我们想在index里面也使用page，理论上应该像discussPosts一样加到属性里，但是我们不用
         // 因为方法在调用前，SpringMVC会自动实例化Model和Page，并将Page注入Model, 因此可以在thymeleaf中直接访问Page
         return "/index";
+    }
+
+
+    @RequestMapping(path = "/error", method = RequestMethod.GET)
+    public String getErrorPage(){
+        return "/error/500";
     }
 }
