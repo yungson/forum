@@ -3,8 +3,10 @@ package org.example.forum.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.example.forum.annotation.LoginRequired;
 import org.example.forum.entity.User;
+import org.example.forum.service.FollowService;
 import org.example.forum.service.LikeService;
 import org.example.forum.service.UserService;
+import org.example.forum.util.ForumConstant;
 import org.example.forum.util.ForumUtil;
 import org.example.forum.util.HostHolder;
 import org.slf4j.Logger;
@@ -26,7 +28,7 @@ import java.io.OutputStream;
 
 @Controller
 @RequestMapping(path = "/user")
-public class UserController {
+public class UserController implements ForumConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -47,6 +49,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     @LoginRequired
@@ -140,6 +145,21 @@ public class UserController {
         model.addAttribute("user", user);
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
+        // 关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        // fan numbers
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+        System.out.println(followerCount);
+        // whether followed or not
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() !=null){
+            hasFollowed = followService.findHasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        System.out.println(hasFollowed);
+        model.addAttribute("hasFollowed", hasFollowed);
+
         return "/site/profile";
     }
 }
