@@ -1,7 +1,9 @@
 package org.example.forum.controller;
 
+import org.example.forum.entity.Event;
 import org.example.forum.entity.Page;
 import org.example.forum.entity.User;
+import org.example.forum.event.EventProducer;
 import org.example.forum.service.FollowService;
 import org.example.forum.service.UserService;
 import org.example.forum.util.ForumConstant;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class FollowController {
+public class FollowController implements  ForumConstant{
 
     @Autowired
     private FollowService followService;
@@ -29,12 +31,21 @@ public class FollowController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private EventProducer eventProducer;
 
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
     @ResponseBody
     public String follow(int entityType, int entityId){
         User user = hostHolder.getUser();
         followService.follow(user.getId(), entityType, entityId);
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
         return ForumUtil.getJSONString(0, "已关注");
     }
 

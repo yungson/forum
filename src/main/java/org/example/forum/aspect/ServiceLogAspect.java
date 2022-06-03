@@ -26,6 +26,9 @@ public class ServiceLogAspect {
     @Before("pointCut()")
     public void before(JoinPoint joinPoint){
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null){ //只有通过controller访问的service才能拿到request, 通过消费者consumer调用的message service没有request可以获取
+            return;
+        }
         HttpServletRequest request = attributes.getRequest();
         String ip = request.getRemoteHost();
         String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());

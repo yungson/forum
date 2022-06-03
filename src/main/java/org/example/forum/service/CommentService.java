@@ -31,6 +31,10 @@ public class CommentService {
         return commentMapper.selectCountByEntity(entityType,entityId);
     }
 
+    public Comment findCommentById(int id){
+        return  commentMapper.selectCommentById(id);
+    }
+
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public int addComment(Comment comment){
         //因为addComment需要执行两次数据库操作，将评论加入comment表，然后更新discuss_post中的commentCount， 所以需要事务管理，要么全更新，要么全失败

@@ -1,0 +1,61 @@
+package org.example.forum.event;
+
+import com.alibaba.fastjson.JSONObject;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.example.forum.entity.Event;
+import org.example.forum.entity.Message;
+import org.example.forum.service.MessageService;
+import org.example.forum.util.ForumConstant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+public class EventConsumer implements ForumConstant {
+
+    private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
+
+    @Autowired
+    private MessageService messageService;
+
+
+    // 一个方法可以消费多个书体
+    // 一个主题也可以被多个方法消费
+    @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_LIKE, TOPIC_FOLLOW})
+    public void handleCommentMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Event can not be null");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if( event == null){
+            logger.error("Incorrect message format from producer!");
+            return;
+        }
+        Message message = new Message();
+        message.setFromId(SYSTEM_USER_ID);
+        message.setToId(event.getEntityUserId());
+        message.setConversationId(event.getTopic());
+        // status defaults to 0, no need to set
+        message.setCreateTime(new Date());
+
+        Map<String, Object> content = new HashMap<>();
+        content.put("userId", event.getUserId());
+        content.put("entityType", event.getEntityType());
+        content.put("entityId", event.getEntityId());
+        if(!event.getData().isEmpty()){
+            for (Map.Entry<String, Object> entry: event.getData().entrySet()){
+                content.put(entry.getKey(), entry.getValue());
+            }
+        }
+        message.setContent(JSONObject.toJSONString(content));
+        logger.info("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+        messageService.addMessage(message);
+    }
+}
