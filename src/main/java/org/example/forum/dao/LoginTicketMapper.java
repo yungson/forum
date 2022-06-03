@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.*;
 import org.example.forum.entity.LoginTicket;
 
 @Mapper
+@Deprecated // 我们已经用redis 存储登录凭证进行登录，此方法已不再使用
 public interface LoginTicketMapper {
     @Insert({
             "insert into login_ticket(user_id, ticket, status, expired) ",
