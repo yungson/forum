@@ -3,6 +3,7 @@ package org.example.forum.config;
 import org.example.forum.controller.interceptor.AlphaInterCeptor;
 import org.example.forum.controller.interceptor.LoginRequiredInterceptor;
 import org.example.forum.controller.interceptor.LoginTicketInterceptor;
+import org.example.forum.controller.interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -19,10 +20,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private AlphaInterCeptor alphaInterCeptor;
 
     @Autowired
-    LoginTicketInterceptor loginTicketInterceptor;
+    private LoginTicketInterceptor loginTicketInterceptor;
 
     @Autowired
-    LoginRequiredInterceptor loginRequiredInterceptor;
+    private LoginRequiredInterceptor loginRequiredInterceptor;
+
+    @Autowired
+    private MessageInterceptor messageInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -34,6 +38,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // loginTicketInterceptor我们设置拦截所有请求
 
         registry.addInterceptor(loginRequiredInterceptor)
+                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg");
+        registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg");
     }
 }

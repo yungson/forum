@@ -28,4 +28,13 @@ public interface MessageMapper {
     // 修改消息的状态
     int updateStatus(List<Integer> ids, int status);
 
+    // select the latest one notice from specified topic
+    Message selectLatestNotice(int userId, String topic);
+
+    int selectNoticeCount(int userId, String topic);
+
+    int selectUnreadNoticeCount(int userId, String topic);
+
+    List<Message> selectNotices(int userId, String topic, int offset, int limit);
+
 }
