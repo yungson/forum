@@ -14,7 +14,6 @@ import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.search.aggregations.Aggregations;
 import org.example.forum.dao.DiscussPostMapper;
 import org.example.forum.dao.elasticsearch.DiscussPostRepository;
 import org.example.forum.entity.DiscussPost;
@@ -159,10 +158,15 @@ public class ElasticSearchTests {
 //            content=[为了帮助大家度过“艰难”，牛客网特别联合60+家企业，开启<em>互联网</em>求职暖春计划，面向18届&19届，拯救0 offer！]}
             DiscussPost post = hit.source();
             System.out.println(hit.highlight());
-            post.setTitle(hit.highlight().get("title").get(0));
-            post.setContent(hit.highlight().get("content").get(0));
+            if(hit.highlight().get("title")!=null){
+                post.setTitle(hit.highlight().get("title").get(0));
+            }
+            if(hit.highlight().get("content")!=null){
+                post.setContent(hit.highlight().get("content").get(0));
+            }
             list.add(post);
         }
+        System.out.println(list.size());
     }
 }
 

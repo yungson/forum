@@ -2,8 +2,11 @@ package org.example.forum.event;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.example.forum.entity.DiscussPost;
 import org.example.forum.entity.Event;
 import org.example.forum.entity.Message;
+import org.example.forum.service.DiscussPostService;
+import org.example.forum.service.ElasticSearchService;
 import org.example.forum.service.MessageService;
 import org.example.forum.util.ForumConstant;
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +28,11 @@ public class EventConsumer implements ForumConstant {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private ElasticSearchService elasticSearchService;
 
     // 一个方法可以消费多个书体
     // 一个主题也可以被多个方法消费
@@ -55,7 +64,6 @@ public class EventConsumer implements ForumConstant {
             }
         }
         message.setContent(JSONObject.toJSONString(content));
-        logger.info("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
         messageService.addMessage(message);
     }
 
@@ -70,6 +78,12 @@ public class EventConsumer implements ForumConstant {
         if( event == null){
             logger.error("Incorrect message format from producer!");
             return;
+        }
+        DiscussPost post = discussPostService.findDiscussPostById(event.getEntityId());
+        try {
+            elasticSearchService.saveDiscussPost(post);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
