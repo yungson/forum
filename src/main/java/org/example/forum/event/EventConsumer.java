@@ -58,4 +58,18 @@ public class EventConsumer implements ForumConstant {
         logger.info("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
         messageService.addMessage(message);
     }
+
+    // 消费发帖事件
+    @KafkaListener(topics = {TOPIC_PUBLISH})
+    public void handlePublishMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Event can not be null");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if( event == null){
+            logger.error("Incorrect message format from producer!");
+            return;
+        }
+    }
 }

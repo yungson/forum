@@ -1,13 +1,8 @@
 package org.example.forum.controller;
 
-import org.example.forum.entity.Comment;
-import org.example.forum.entity.DiscussPost;
-import org.example.forum.entity.Page;
-import org.example.forum.entity.User;
-import org.example.forum.service.CommentService;
-import org.example.forum.service.DiscussPostService;
-import org.example.forum.service.LikeService;
-import org.example.forum.service.UserService;
+import org.example.forum.entity.*;
+import org.example.forum.event.EventProducer;
+import org.example.forum.service.*;
 import org.example.forum.util.ForumConstant;
 import org.example.forum.util.ForumUtil;
 import org.example.forum.util.HostHolder;
@@ -39,6 +34,8 @@ public class DiscussPostController implements ForumConstant {
 
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private EventProducer eventProducer;
 
     @RequestMapping(path = "/add",method = RequestMethod.POST)
     @ResponseBody
@@ -53,6 +50,14 @@ public class DiscussPostController implements ForumConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
+
         // 报错的情况将来统一处理。
         return ForumUtil.getJSONString(0, "Post Success");
     }
