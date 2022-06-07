@@ -20,4 +20,7 @@ public interface ForumConstant {
     String TOPIC_COMMENT = "comment";
     String TOPIC_LIKE = "like";
     String TOPIC_FOLLOW = "follow";
+    String AUTHORITY_USER = "user"; // 普通用户
+    String AUTHORITY_ADMIN = "admin"; // 管理员
+    String AUTHORITY_MODERATOR = "moderator"; //版主
 }

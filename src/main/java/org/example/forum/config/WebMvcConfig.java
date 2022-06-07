@@ -1,7 +1,5 @@
 package org.example.forum.config;
 
-import org.example.forum.controller.interceptor.AlphaInterCeptor;
-import org.example.forum.controller.interceptor.LoginRequiredInterceptor;
 import org.example.forum.controller.interceptor.LoginTicketInterceptor;
 import org.example.forum.controller.interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,29 +14,29 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private AlphaInterCeptor alphaInterCeptor;
+//    @Autowired
+//    private AlphaInterCeptor alphaInterCeptor;
 
     @Autowired
     private LoginTicketInterceptor loginTicketInterceptor;
 
-    @Autowired
-    private LoginRequiredInterceptor loginRequiredInterceptor;
+//    @Autowired
+//    private LoginRequiredInterceptor loginRequiredInterceptor;
 
     @Autowired
     private MessageInterceptor messageInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(alphaInterCeptor)
-                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg") //静态资源不需要拦截，**排除掉所有目录的css
-                .excludePathPatterns("/register", "/login"); // 需要拦截的放到这里, 比如在访问login page的时候就可以看到拦截器的preHandler, postHandler, 等输出，说明确实拦截到了
+//        registry.addInterceptor(alphaInterCeptor)
+//                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg") //静态资源不需要拦截，**排除掉所有目录的css
+//                .excludePathPatterns("/register", "/login"); // 需要拦截的放到这里, 比如在访问login page的时候就可以看到拦截器的preHandler, postHandler, 等输出，说明确实拦截到了
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg"); //静态资源不需要拦截，**排除掉所有目录的css
         // loginTicketInterceptor我们设置拦截所有请求
 
-        registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg");
+//        registry.addInterceptor(loginRequiredInterceptor)
+//                .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg");
         registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/**/*.css", "/**/*.js", "/**/*.png","/**/*.jpg" , "/**/*.jpeg");
     }
