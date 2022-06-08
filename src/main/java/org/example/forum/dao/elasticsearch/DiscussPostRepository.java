@@ -9,5 +9,4 @@ public interface DiscussPostRepository extends ElasticsearchRepository<DiscussPo
     //ElasticsearchRepository<DiscussPost, Integer> DiscussPost实体类的类型，Integer是实体类的组件类型？
     // spring会自动对此接口进行一个实现， 可以直接使用
 
-
 }
