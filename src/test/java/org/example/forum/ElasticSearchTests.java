@@ -79,7 +79,7 @@ public class ElasticSearchTests {
         List<Integer> ids = new ArrayList<>(Arrays.asList(101, 102, 103, 111, 112, 131, 132, 133, 134));
         BulkRequest.Builder br = new BulkRequest.Builder();
         for(Integer postId: ids){
-            posts.addAll(discussPostMapper.selectDiscussPosts(postId, 0, 100));
+            posts.addAll(discussPostMapper.selectDiscussPosts(postId, 0, 100, 0));
         }
         for (DiscussPost post : posts) {
             br.operations(op -> op

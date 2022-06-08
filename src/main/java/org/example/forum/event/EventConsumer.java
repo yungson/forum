@@ -12,6 +12,7 @@ import org.example.forum.util.ForumConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,12 @@ public class EventConsumer implements ForumConstant {
 
     @Autowired
     private ElasticSearchService elasticSearchService;
+
+    @Value("${wk.image.storage}")
+    private String wkImageStorage;
+
+    @Value("${wk.image.command}")
+    private String wkCommand;
 
     // 一个方法可以消费多个书体
     // 一个主题也可以被多个方法消费
@@ -102,6 +109,33 @@ public class EventConsumer implements ForumConstant {
             elasticSearchService.deleteDiscussPost(event.getEntityId());
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @KafkaListener(topics = {TOPIC_SHARE})
+    public void handleShareMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Event can not be null");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if( event == null){
+            logger.error("Incorrect message format from producer!");
+            return;
+        }
+        String htmlUrl = (String) event.getData().get("htmlUrl");
+        String fileName = (String)  event.getData().get("fileName");
+        String suffix = (String)  event.getData().get("suffix");
+        String cmd = wkCommand+" --quality 75 "+htmlUrl+" "+wkImageStorage+"/"+fileName+suffix;
+        try {
+            Process p = Runtime.getRuntime().exec(cmd);
+            if (p.waitFor() == 0 ){
+                logger.info("成功生成长图!");
+            }
+        } catch (IOException e) {
+            logger.error("Fail to generate share png: "+e.getMessage());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
