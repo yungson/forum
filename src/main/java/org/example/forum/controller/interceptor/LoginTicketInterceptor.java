@@ -29,10 +29,8 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String ticket = CookieUtil.getValue(request, "ticket");
-        System.out.println("request = " + request.getRequestURI());
         if (ticket!=null){
             LoginTicket loginTicket = userService.findLoginTicket(ticket);
-            System.out.println("loginTicket = " + loginTicket.toString());
             if(loginTicket!=null && loginTicket.getStatus() == 0 && loginTicket.getExpired().after(new Date())){
                 User user = userService.findUserById(loginTicket.getUserId());
                 // 在本次请求中持有user，但是由于HTTP是多线程的，我们只能通过java的threadLocal方式去"线程隔离"地存到对应线程中去，每个线程互不干扰
@@ -43,7 +41,6 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                         user, user.getPassword(), userService.getAuthorities(user.getId()));
                 SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
-                System.out.println("拦截"+SecurityContextHolder.getContext().toString());
             }
         }
         return true;

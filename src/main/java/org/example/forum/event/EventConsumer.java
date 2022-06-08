@@ -86,4 +86,22 @@ public class EventConsumer implements ForumConstant {
             e.printStackTrace();
         }
     }
+
+    @KafkaListener(topics = {TOPIC_DELETE})
+    public void handleDeleteMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Event can not be null");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if( event == null){
+            logger.error("Incorrect message format from producer!");
+            return;
+        }
+        try {
+            elasticSearchService.deleteDiscussPost(event.getEntityId());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

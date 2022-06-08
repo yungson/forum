@@ -46,10 +46,10 @@ public class ElasticSearchService {
         );
     }
 
-    public void deleteDiscussPost(DiscussPost post) throws IOException {
+    public void deleteDiscussPost(int id) throws IOException {
         client.delete(i->i
                 .index("discusspost")
-                .id(String.valueOf(post.getId()))
+                .id(String.valueOf(id))
         );
     }
 
