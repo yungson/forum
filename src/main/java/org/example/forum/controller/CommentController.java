@@ -8,7 +8,9 @@ import org.example.forum.service.CommentService;
 import org.example.forum.service.DiscussPostService;
 import org.example.forum.util.ForumConstant;
 import org.example.forum.util.HostHolder;
+import org.example.forum.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,8 @@ public class CommentController implements ForumConstant {
     private EventProducer eventProducer;
     @Autowired
     private DiscussPostService discussPostService;
-
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable("discussPostId") int discussPostId, Comment comment){
@@ -61,6 +64,9 @@ public class CommentController implements ForumConstant {
                     .setEntityType(ENTITY_TYPE_POST)
                     .setEntityId(discussPostId);
             eventProducer.fireEvent(event);
+            // 计算帖子分数
+            String redisKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey, discussPostId);
         }
 
 

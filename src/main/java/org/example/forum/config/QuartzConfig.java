@@ -1,8 +1,10 @@
 package org.example.forum.config;
 
 import org.example.forum.quartz.AlphaJob;
+import org.example.forum.quartz.PostScoreRefreshJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
@@ -39,6 +41,29 @@ public class QuartzConfig {
         factoryBean.setName("alphaTrigger");
         factoryBean.setGroup("alphaTriggerGroup");
         factoryBean.setRepeatInterval(3000);
+        factoryBean.setJobDataMap(new JobDataMap()); // trigger底层用于存储job状态的datamap
+        return factoryBean;
+    }
+
+    // 刷新帖子分数的任务
+    @Bean
+    public JobDetailFactoryBean postScoreRefreshJobDetail() {
+        JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
+        factoryBean.setJobClass(PostScoreRefreshJob.class);
+        factoryBean.setName("postScoreRefreshJob");
+        factoryBean.setGroup("forumJobGroup");
+        factoryBean.setDurability(true); //是否长久保存
+        factoryBean.setRequestsRecovery(true); //任务是否可恢复
+        return factoryBean;
+    }
+
+    @Bean
+    public SimpleTriggerFactoryBean postScoreRefreshTrigger(JobDetail postScoreRefreshJobDetail){
+        SimpleTriggerFactoryBean factoryBean = new SimpleTriggerFactoryBean();
+        factoryBean.setJobDetail(postScoreRefreshJobDetail);
+        factoryBean.setName("postScoreRefreshTrigger");
+        factoryBean.setGroup("forumTriggerGroup");
+        factoryBean.setRepeatInterval(1000*60*5);
         factoryBean.setJobDataMap(new JobDataMap()); // trigger底层用于存储job状态的datamap
         return factoryBean;
     }
