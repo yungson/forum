@@ -39,6 +39,10 @@ public class ShareController  implements ForumConstant  {
     @Autowired
     private EventProducer eventProducer;
 
+    @Value("${qiniu.bucket.share.url}")
+    private String shareUrl;
+
+
     @RequestMapping(path = "/share", method= RequestMethod.GET)
     @ResponseBody
     public String share(String htmlUrl){
@@ -50,12 +54,15 @@ public class ShareController  implements ForumConstant  {
                 .setData("fileName", fileName)
                 .setData("suffix", ".png");
         eventProducer.fireEvent(event);
+        // 返回访问路径
         Map<String, Object> map = new HashMap<>();
-        map.put("shareUrl", domain+contextPath+"/share/image/"+fileName);
+//        map.put("shareUrl", domain+contextPath+"/share/image/"+fileName);
+        map.put("shareUrl", shareUrl+"/"+fileName);
         return ForumUtil.getJSONString(0, null, map);
     }
 
 
+    // 已废弃
     @RequestMapping(path = "/share/image/{fileName}", method= RequestMethod.GET)
     public void getShareImage(@PathVariable("fileName") String fileName, HttpServletResponse response){
         if (StringUtils.isBlank(fileName)){

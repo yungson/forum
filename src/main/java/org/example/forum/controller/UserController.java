@@ -1,5 +1,7 @@
 package org.example.forum.controller;
 
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.example.forum.annotation.LoginRequired;
 import org.example.forum.entity.User;
@@ -18,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -53,12 +56,43 @@ public class UserController implements ForumConstant {
     @Autowired
     private FollowService followService;
 
+    @Value("${qiniu.key.access}")
+    private String accessKey;
+    @Value("${qiniu.key.secret}")
+    private String accessSecret;
+    @Value("${qiniu.bucket.header.name}")
+    private String headerName;
+    @Value("${qiniu.bucket.header.url}")
+    private String headerUrl;
+
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     @LoginRequired
-    public String getSettingPage(){
+    public String getSettingPage(Model model){
+        // 上传文件名称
+        String fileName = ForumUtil.generateUUID();
+        // 设置响应信息
+        StringMap policy = new StringMap();
+        policy.put("returnBody", ForumUtil.getJSONString(0));
+        // 生成上传凭证
+        Auth auth = Auth.create(accessKey, accessSecret);
+        String uploadToken = auth.uploadToken(headerName, fileName, 3600, policy);
+        model.addAttribute("uploadToken", uploadToken);
+        model.addAttribute("fileName", fileName);
         return "/site/setting";
     }
 
+    @RequestMapping(path = "/header/url", method = RequestMethod.POST)
+    @ResponseBody
+    public String updateHeaderUrl(String fileName){
+        if(StringUtils.isBlank(fileName)){
+            return ForumUtil.getJSONString(1, "文件名不能为空");
+        }
+        String url = headerUrl+"/"+fileName;
+        userService.updateHeader(hostHolder.getUser().getId(), url);
+        return ForumUtil.getJSONString(0);
+    }
+
+    // 已经废弃
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     @LoginRequired
     public String uploadHeader(MultipartFile headerImage, Model model) {
@@ -117,6 +151,7 @@ public class UserController implements ForumConstant {
         // return "redirect:/site/operate-result"; //难道是model不会传入重定向的链接中去？
     }
 
+    // 已经废弃
     @RequestMapping(path="/header/{fileName}", method = RequestMethod.GET)
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response) { //当向浏览器响应二进制数据的时候，一般返回值设置成void,然后通过输出流传输
         fileName = uploadPath+"/"+fileName;
