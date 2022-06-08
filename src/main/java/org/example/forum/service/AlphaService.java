@@ -6,6 +6,8 @@ import org.example.forum.dao.UserMapper;
 import org.example.forum.entity.DiscussPost;
 import org.example.forum.entity.User;
 import org.example.forum.util.ForumUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
@@ -23,9 +25,10 @@ import java.util.Date;
 @Service
 public class AlphaService {
 
+    private  static  final Logger logger = LoggerFactory.getLogger(AlphaService.class);
+
     @Autowired
     private AlphaDao alphaDao;
-
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -108,4 +111,14 @@ public class AlphaService {
             }
         });
     }
+
+    //@Async让该方法在多线程环境下被异步的调用
+//    @Async
+//    public void run1(){
+//        logger.debug("spring线程池简化使用方式");
+//    }
+//    @Scheduled(initialDelay = 10000, fixedRate = 1000)
+//    public void run2(){
+//        logger.debug("spring定时任务线程池简化使用方式");
+//    }
 }
