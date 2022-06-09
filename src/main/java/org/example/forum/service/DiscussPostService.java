@@ -98,7 +98,6 @@ public class DiscussPostService {
         if(post==null){
             throw new IllegalArgumentException("discussPost cannot be null!");
         }
-
         // 转义html标记 比如标题或内容里含<script> </script>的
         post.setTitle(HtmlUtils.htmlEscape(post.getTitle()));
         post.setContent(HtmlUtils.htmlEscape(post.getContent()));
