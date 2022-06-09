@@ -33,7 +33,7 @@ public class ServiceLogAspect {
         String ip = request.getRemoteHost();
         String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         String method = joinPoint.getSignature().getDeclaringTypeName()+"."+joinPoint.getSignature().getName();
-        logger.info(String.format("用户[%s], 在[%s], 访问了[%s]", ip, now, method));
+//        logger.debug(String.format("用户[%s], 在[%s], 访问了[%s]", ip, now, method));
     }
 
 }
