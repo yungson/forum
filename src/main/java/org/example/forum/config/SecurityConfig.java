@@ -43,7 +43,7 @@ public class SecurityConfig implements ForumConstant {
                         "/unfollow")
                 .hasAnyAuthority(AUTHORITY_USER, AUTHORITY_ADMIN, AUTHORITY_MODERATOR)
                 .antMatchers("/discuss/top", "/discuss/credit").hasAnyAuthority(AUTHORITY_MODERATOR)
-                .antMatchers("/discuss/delete","/data/**").hasAnyAuthority(AUTHORITY_ADMIN)
+                .antMatchers("/discuss/delete","/data/**", "/actuator/**").hasAnyAuthority(AUTHORITY_ADMIN)
                 .anyRequest().permitAll() //除了上面的请求意外其他所有请求都允许
                 .and().csrf().disable(); //禁用掉csrf的验证
 
