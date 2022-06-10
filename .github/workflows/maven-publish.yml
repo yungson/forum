@@ -24,6 +24,7 @@ jobs:
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
+        
 
     - name: Build with Maven
       run: mvn -B -DskipTests=true package --file pom.xml && mkdir staging && cp target/*.war staging
@@ -33,6 +34,7 @@ jobs:
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "${{ env.RELEASE_VERSION }}"
         prerelease: false
         title: "Release ${{ env.RELEASE_VERSION }}"
         files: |
