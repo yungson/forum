@@ -17,8 +17,10 @@ import org.example.forum.entity.DiscussPost;
 import org.example.forum.entity.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +29,28 @@ import java.util.List;
 public class ElasticSearchService {
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchService.class);
 
+    @Value("${es.host}")
+    private String esHost;
+
+    @Value("${es.port}")
+    private Integer esPort;
+
+    private ElasticsearchClient client;
+
+    @PostConstruct
+    public void init() {
+        RestClient restClient = RestClient.builder(
+                new HttpHost(esHost, 9200)).build();
+
+        // Create the transport with a Jackson mapper
+        ElasticsearchTransport transport = new RestClientTransport(
+                restClient, new JacksonJsonpMapper());
+
+        // And create the API client
+        ElasticsearchClient client = new ElasticsearchClient(transport);
+        this.client = client;
+    }
     // Create the low-level client
-    RestClient restClient = RestClient.builder(
-            new HttpHost("localhost", 9200)).build();
-
-    // Create the transport with a Jackson mapper
-    ElasticsearchTransport transport = new RestClientTransport(
-            restClient, new JacksonJsonpMapper());
-
-    // And create the API client
-    ElasticsearchClient client = new ElasticsearchClient(transport);
 
     public void saveDiscussPost(DiscussPost post) throws IOException {
         IndexResponse response = client.index(i -> i

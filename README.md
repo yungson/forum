@@ -4,7 +4,10 @@
 
 A server with >8GB memory is recommended. This forum application can be easily deployed using docker.
 
-#### 1. Download config files package.
+#### download and packaging
+```shell
+docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn package -Dmaven.test.skip=true
+```
 
 ### checking
 
