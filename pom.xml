@@ -15,7 +15,7 @@
 	<description>An community discussion forum for teams and groups</description>
 	<packaging>war</packaging>
 	<properties>
-		<java.version>18</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
