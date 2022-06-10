@@ -12,7 +12,8 @@
 	<artifactId>forum</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>forum</name>
-	<description>Demo project for Spring Boot</description>
+	<description>An community discussion forum for teams and groups</description>
+	<packaging>war</packaging>
 	<properties>
 		<java.version>18</java.version>
 	</properties>
@@ -121,6 +122,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>ROOT</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -128,6 +130,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
 
 </project>
