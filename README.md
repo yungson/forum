@@ -111,3 +111,12 @@ git clone the project and using the command below to package
 ```shell
 docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn clean package  -Dmaven.test.skip=true
 ```
+
+
+You need to set the following environment variables accordingly to make it work
+```shell
+ export datasource_password=your_root_password_for_mysql
+ export qqmail_authorization_code=your_mail_actuorization_code_or_password
+ export qiniu_access_key=your_cdn_access_key
+ export qiniu_access_secret=your_cdn_access_secret
+```
