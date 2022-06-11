@@ -35,7 +35,7 @@ public class CommentController implements ForumConstant {
     private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
-    public String addComment(@PathVariable("discussPostId") int discussPostId, Comment comment){
+    public String addComment(@PathVariable("discussPostId") int discussPostId, Comment comment){ // 可以接收一个实体
         comment.setUserId(hostholder.getUser().getId()); // 没有登录情况咋办？
         comment.setStatus(0);
         comment.setCreateTime(new Date());
@@ -51,7 +51,7 @@ public class CommentController implements ForumConstant {
             DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         } else if (comment.getEntityType() == ENTITY_TYPE_COMMENT){
-            Comment target = commentService.findCommentById(comment.getUserId());
+            Comment target = commentService.findCommentById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         }
         eventProducer.fireEvent(event);
@@ -68,7 +68,6 @@ public class CommentController implements ForumConstant {
             String redisKey = RedisKeyUtil.getPostScoreKey();
             redisTemplate.opsForSet().add(redisKey, discussPostId);
         }
-
 
         return "redirect:/discuss/detail/"+discussPostId;
     }

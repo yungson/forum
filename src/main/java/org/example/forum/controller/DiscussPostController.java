@@ -127,7 +127,7 @@ public class DiscussPostController implements ForumConstant {
                 commentVo.put("replies", replyVoList);
 
                 // comment count
-                int replyCount = commentService.findCommentCount(ENTITY_TYPE_POST, comment.getId());
+                int replyCount = commentService.findCommentCount(ENTITY_TYPE_COMMENT, comment.getId());
                 commentVo.put("replyCount", replyCount);
                 commentVoList.add(commentVo);
             }

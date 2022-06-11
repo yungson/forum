@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class EventConsumer implements ForumConstant {
@@ -148,10 +149,13 @@ public class EventConsumer implements ForumConstant {
         String suffix = (String)  event.getData().get("suffix");
         String cmd = wkCommand+" --quality 75 "+htmlUrl+" "+wkImageStorage+"/"+fileName+suffix;
         try {
+            // 注意不能如果不设置ProcessBuilder的环境变量的话，不能将wkCommand+args放到一起，
+            // 否则会报File Not found命令，因为java子process会去寻找"wkCommand+args"命令
+//            Process p = new ProcessBuilder(wkCommand, args).start();
+//            p.waitFor(30000, TimeUnit.MILLISECONDS);
             Process p = Runtime.getRuntime().exec(cmd);
-            if (p.waitFor() == 0 ){
-                logger.info("成功生成长图!");
-            }
+            // 临时解决方案，因为发现如果没有这个waitFor, sub-process并不会被创建, 并不能异步
+            p.waitFor(30000, TimeUnit.MILLISECONDS);
         } catch (IOException e) {
             logger.error("Fail to generate share png: "+e.getMessage());
         } catch (InterruptedException e) {
@@ -184,40 +188,40 @@ public class EventConsumer implements ForumConstant {
         public void run() {
             // 生成失败
             if(System.currentTimeMillis()-startTime>30000){
-                logger.error("生成图片时间过长，终止任务："+fileName);
+                logger.error("生成图片时间过长，终止任务："+fileName+suffix);
                 future.cancel(true);
                 return;
             }
             if(uploadTimes>=3){
-                logger.error("上传图片次数过多，终止任务："+fileName);
+                logger.error("上传图片次数过多，终止任务："+fileName+suffix);
                 future.cancel(true);
                 return;
             }
             String path = wkImageStorage+"/"+fileName+suffix;
             File file = new File(path);
             if (file.exists()){
-                logger.info(String.format("开始第[%d]次上传[%s]",++uploadTimes,fileName));
+                logger.info(String.format("开始第[%d]次上传[%s]",++uploadTimes, fileName+suffix));
                 // 设置响应信息
                 StringMap policy = new StringMap();
                 policy.put("returnBody", ForumUtil.getJSONString(0));
                 Auth auth = Auth.create(accessKey, accessSecret);
-                String uploadToken = auth.uploadToken(shareName, fileName, 3600, policy);
+                String uploadToken = auth.uploadToken(shareName, fileName+suffix, 3600, policy);
                 UploadManager manager = new UploadManager(new Configuration(Region.region1()));
                 try{
                     logger.info(path);
-                    Response response = manager.put(path, fileName, uploadToken, null, "image/"+suffix, false);
+                    Response response = manager.put(path, fileName+suffix, uploadToken, null, "image/png", false);
                     JSONObject json = JSONObject.parseObject(response.bodyString());
                     if (json == null || json.get("code") == null || !json.get("code").toString().equals("0")) {
-                        logger.info(String.format("第[%d]次上传失败[%s]", uploadTimes, fileName));
+                        logger.info(String.format("第[%d]次上传失败[%s]", uploadTimes, fileName+suffix));
                     } else {
-                        logger.info(String.format("第[%d]次上传成功[%s]", uploadTimes, fileName));
+                        logger.info(String.format("第[%d]次上传成功[%s]", uploadTimes, fileName+suffix));
                         future.cancel(true);
                     }
                 } catch (QiniuException e){
-                    logger.info(String.format("第[%d]次上传失败[%s], error:[%s]", uploadTimes, fileName, e.getMessage()));
+                    logger.info(String.format("第[%d]次上传失败[%s], error:[%s]", uploadTimes, fileName+suffix, e.getMessage()));
                 }
             }else{
-                logger.info("等待图片生成..."+fileName);
+                logger.info("等待图片生成..."+fileName+suffix);
             }
         }
     }

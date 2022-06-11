@@ -57,7 +57,7 @@ public class ShareController  implements ForumConstant  {
         // 返回访问路径
         Map<String, Object> map = new HashMap<>();
 //        map.put("shareUrl", domain+contextPath+"/share/image/"+fileName);
-        map.put("shareUrl", shareUrl+"/"+fileName);
+        map.put("shareUrl", shareUrl+"/"+fileName+".png");
         return ForumUtil.getJSONString(0, null, map);
     }
 
