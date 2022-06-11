@@ -4,7 +4,8 @@ only by this way can spring identify the configurations and apply to the applica
 -->
 <configuration>
     <contextName>forum</contextName>
-    <property name="LOG_PATH" value="/Users/yongshengli/Downloads"/>
+<!--    <property name="LOG_PATH" value="/Users/yongshengli/Downloads"/>-->
+    <springProperty scope="context" name="LOG_PATH" source="log.savedir"/>
     <property name="APPDIR" value="forum"/>
 
     <!-- error file -->
