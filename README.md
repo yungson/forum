@@ -2,16 +2,19 @@
 
 ## Installation
 
-A server with >8GB memory is recommended. This forum application can be easily deployed using docker.
+A server with >4GB memory is recommended. This forum application can be easily deployed using docker.
 
-#### download and packaging
+### config the environment
+
+### checking the status of each service
+
+## create network
+
 ```shell
-docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn package -Dmaven.test.skip=true
+ docker network create -d bridge my-net
 ```
 
-### checking
-
-Check the status of each docker container  as follows
+Check the status of each docker container as follows
 
 #### mysql
 
@@ -102,3 +105,9 @@ hello
 world!
 ```
 
+### download and packaging
+
+git clone the project and using the command below to package
+```shell
+docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn clean package  -Dmaven.test.skip=true
+```

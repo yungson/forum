@@ -15,7 +15,6 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.example.forum.dao.DiscussPostMapper;
-import org.example.forum.dao.elasticsearch.DiscussPostRepository;
 import org.example.forum.entity.DiscussPost;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -37,8 +36,9 @@ public class ElasticSearchTests {
     @Autowired
     private DiscussPostMapper discussPostMapper;
 
-    @Autowired
-    private DiscussPostRepository discussPostRepository;
+//    @Autowired
+//    private DiscussPostRepository discussPostRepository;
+// using DiscussPostRepository is for older elastic search versions and is deprecated!
 
     // Create the low-level client
     RestClient restClient = RestClient.builder(
