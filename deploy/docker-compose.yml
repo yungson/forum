@@ -1,0 +1,122 @@
+version: '1.0.0'
+
+services:
+
+  db:
+    image: mysql:8.0.29
+    container_name: forum_mysql
+    ports:
+      - 3306:3306
+    volumes:
+      - ${data_mysql}:/var/lib/mysql
+      - ${config_dir}/my.cnf:/etc/mysql/my.cnf
+      - ${config_dir}/init:/docker-entrypoint-initdb.d/  # 只有当/var/lib/mysql下面没有东西的时候才会执行初始化数据库，否则不执行
+      - ${config_dir}/initdb:/opt/sql
+    restart: always
+    command:  --default-authentication-plugin=caching_sha2_password
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${datasource_password}
+  adminer:
+    image: adminer
+    restart: always
+    container_name: forum_mysql_adminer
+    ports:
+      - 8081:8080
+
+  redis:
+    restart: always
+    image: redis:6.2.7
+    container_name: forum_redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ${data_redis}:/data
+
+  elasticsearch:
+    restart: always
+    image: elasticsearch:7.17.3
+    container_name: forum_es
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - ${data_elasticsearch}:/usr/share/elasticsearch/data
+      - ${data_elasticsearch}/ik:/usr/share/elasticsearch/plugins/ik
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx512m"
+      - "network.host: forum_tomcat"
+  
+  zookeeper:
+    restart: always
+    image: bitnami/zookeeper:3.8
+    container_name: forum_zookeeper
+    ports:
+      - 2181:2181
+    volumes:
+      - ${data_zookeeper}:/bitnami/zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    restart: always
+    image: bitnami/kafka:3.2.0
+    container_name: forum_kafka
+    hostname: forum_kafka
+    ports:
+      - 9092:9092
+    volumes:
+      - ${data_kafka}:/bitnami/kafka
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_HOST_NAME=forum_kafka
+      - KAFKA_ADVERTISED_PORT=9092
+      - KAFKA_HEAP_OPTS=-Xmx256M -Xms128M
+    depends_on:
+      - zookeeper
+  tomcat:
+    restart: always
+    image: tomcat:9.0.22
+    container_name: forum_tomcat
+    ports:
+      - 8888:8080
+    volumes:
+      - ${data_tomcat}/webapps:/usr/local/tomcat/webapps
+      - /etc/localtime:/etc/localtime:ro 
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - ${data_system}:${data_system}
+    environment:
+      - datasource_password=${datasource_password}
+      - server_ip=${server_ip}
+      - qqmail_authorization_code=${qqmail_authorization_code}
+      - data_upload_dir=${data_upload_dir}
+      - wk_image_command=${wk_image_command}
+      - wk_image_storage=${wk_image_storage}
+      - qiniu_access_key=${qiniu_access_key}
+      - qiniu_access_secret=${qiniu_access_secret}
+      - log_savedir=${data_system}
+    depends_on:
+      - mysql
+      - kafka
+      - redis
+      - elasticsearch
+
+  web:
+    restart: always
+    image: nginx
+    container_name: forum_nginx
+    volumes:
+      - ${config_dir}/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+    environment:
+      - NGINX_PORT=80
+    depends_on:
+      - tomcat
+networks:
+  default:
+    name: my-net
+    external: true
