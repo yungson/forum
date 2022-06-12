@@ -99,11 +99,10 @@ if [ ! -d "$deploy_root/elasticsearch/ik" ]; then
 	unzip $data_elasticsearch/elasticsearch-analysis-ik-7.17.3.zip -d $data_elasticsearch/ik 
 fi
 
-if [ ! -f "$data_tomcat/webapps/ROOT.war" ]; then
-	sed -i "s#spring.profiles.active=develop#spring.profiles.active=production#g" src/main/resources/application.properties && \
-	docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn clean package \
-	-Dmaven.test.skip=true -Dactive.profile=production
-	cp target/ROOT.war $data_tomcat/webapps/
-fi
+sed -i "s#spring.profiles.active=develop#spring.profiles.active=production#g" src/main/resources/application.properties && \
+docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn clean package \
+-Dmaven.test.skip=true -Dactive.profile=production
+rm -rf  $data_tomcat/webapps/ROOT*
+cp target/ROOT.war $data_tomcat/webapps/
 
 docker compose  up -d
