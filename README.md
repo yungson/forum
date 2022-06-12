@@ -54,4 +54,4 @@ sh install.sh  82.156.26.62 /project/forum
 
 
 ### to do list
-- [x] forget password
+- [ ] forget password
