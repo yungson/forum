@@ -46,6 +46,7 @@ services:
     environment:
       - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms256m -Xmx512m"
+      - "network.host: 0.0.0.0"
   
   zookeeper:
     restart: always
@@ -119,3 +120,4 @@ networks:
   default:
     name: my-net
     external: true
+
