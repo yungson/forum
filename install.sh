@@ -1,7 +1,7 @@
 set -e pipefail
 # docker rm -f $(docker ps -a -q)
 # rm -rf /mnt/volume_sfo3_01/project/forum
-
+docker network create -d bridge my-net
 export deploy_root=/mnt/volume_sfo3_01/project/forum
 
 export config_dir=$PWD/deploy
