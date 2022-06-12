@@ -1,8 +1,14 @@
 set -e pipefail
 # docker rm -f $(docker ps -a -q)
 # rm -rf /mnt/volume_sfo3_01/project/forum
-docker network create -d bridge my-net
-export deploy_root=/mnt/volume_sfo3_01/project/forum
+docker network ls|grpe my-net
+if [ $? -eq 0 ]; then
+  echo Netowork my-net exist! Skip!
+else
+  docker network create -d bridge my-net
+fi
+
+export deploy_root=$1
 
 export config_dir=$PWD/deploy
 
@@ -39,7 +45,7 @@ if [ ! -f "$data_tomcat/webapps/ROOT.war" ]; then
 	sed -i "s#spring.profiles.active=develop#spring.profiles.active=production#g" src/main/resources/application.properties && \
 	docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn clean package \
 	-Dmaven.test.skip=true -Dactive.profile=production
+	cp target/ROOT.war $data_tomcat/webapps/
 fi
 
-cp target/ROOT.war $data_tomcat/webapps/
 docker compose  up
