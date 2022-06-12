@@ -1,7 +1,7 @@
 
 ## Introduction
+![Architecture of Bee Community Application](https://www.processon.com/view/link/62a577285653bb5256cc92f3)
 
-<iframe id="embed_dom" name="embed_dom" frameborder="0" style="display:block;width:525px; height:245px;" src="https://www.processon.com/embed/62a55ff75653bb5256cc7830"></iframe>
 ## Installation
 
 A server with >4GB memory is recommended. This forum application can be easily deployed using docker.
