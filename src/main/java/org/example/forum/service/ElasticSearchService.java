@@ -3,8 +3,11 @@ package org.example.forum.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.BulkRequest;
+import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
@@ -17,6 +20,7 @@ import org.example.forum.entity.DiscussPost;
 import org.example.forum.entity.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +39,9 @@ public class ElasticSearchService {
     @Value("${es.port}")
     private Integer esPort;
 
+    @Autowired
+    private DiscussPostService discussPostService;
+
     private ElasticsearchClient client;
 
     @PostConstruct
@@ -51,7 +58,28 @@ public class ElasticSearchService {
         this.client = client;
     }
     // Create the low-level client
-
+    private void initPostIndex() throws IOException {
+        BulkRequest.Builder br = new BulkRequest.Builder();
+        List<DiscussPost> posts = discussPostService.findDiscussPosts(0, 0, 0, 200);
+        for (DiscussPost post : posts) {
+            br.operations(op -> op
+                    .index(idx -> idx
+                            .index("discusspost")
+                            .id(String.valueOf(post.getId()))
+                            .document(post)
+                    )
+            );
+        }
+        BulkResponse result = client.bulk(br.build());
+        if (result.errors()) {
+            logger.error("Bulk had errors");
+            for (BulkResponseItem item: result.items()) {
+                if (item.error() != null) {
+                    logger.error(item.error().reason());
+                }
+            }
+        }
+    }
     public void saveDiscussPost(DiscussPost post) throws IOException {
         IndexResponse response = client.index(i -> i
                 .index("discusspost")
