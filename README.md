@@ -1,8 +1,11 @@
 
 ## Introduction
+<img src=http://rd6c84nbk.hb-bkt.clouddn.com/my/logo.png width=7% />
 This is an online discuss community for teams, groups to share ideas and 
 information efficiently. Let's name it "Bee Community". The application
 demo can be found at  [82.156.26.62](http://82.156.26.62/).
+
+You can use test account: `username=aaa password=aaa`, or create a new account!
 
 ## Installation
 This forum application can be easily deployed using docker.
