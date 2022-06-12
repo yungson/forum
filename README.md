@@ -2,7 +2,7 @@
 ## Introduction
 This is an online discuss community for teams, groups to share ideas and 
 information efficiently. Let's name it "Bee Community". The application
-demo can be found at  [82.156.26.62](82.156.26.62).
+demo can be found at  [82.156.26.62](http://82.156.26.62/).
 
 ## Installation
 This forum application can be easily deployed using docker.
