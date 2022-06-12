@@ -3,19 +3,18 @@ package org.example.forum.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch.core.BulkRequest;
-import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
+import org.example.forum.dao.DiscussPostMapper;
 import org.example.forum.entity.DiscussPost;
 import org.example.forum.entity.SearchResult;
 import org.slf4j.Logger;
@@ -40,12 +39,12 @@ public class ElasticSearchService {
     private Integer esPort;
 
     @Autowired
-    private DiscussPostService discussPostService;
+    private DiscussPostMapper discussPostMapper;
 
     private ElasticsearchClient client;
 
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
         RestClient restClient = RestClient.builder(
                 new HttpHost(esHost, 9200)).build();
 
@@ -55,29 +54,20 @@ public class ElasticSearchService {
 
         // And create the API client
         ElasticsearchClient client = new ElasticsearchClient(transport);
-        this.client = client;
-    }
-    // Create the low-level client
-    private void initPostIndex() throws IOException {
-        BulkRequest.Builder br = new BulkRequest.Builder();
-        List<DiscussPost> posts = discussPostService.findDiscussPosts(0, 0, 0, 200);
-        for (DiscussPost post : posts) {
-            br.operations(op -> op
-                    .index(idx -> idx
-                            .index("discusspost")
-                            .id(String.valueOf(post.getId()))
-                            .document(post)
-                    )
-            );
+        BooleanResponse indexExist = client.indices().exists(r -> r.index("discusspost"));
+        if (!indexExist.value()) {
+            logger.info("index does not exist, creating index discusspost....");
+            client.indices().create(r->r.index("discusspost"));
+        }else {
+            logger.info("index [discusspost] already exist, skip...");
         }
-        BulkResponse result = client.bulk(br.build());
-        if (result.errors()) {
-            logger.error("Bulk had errors");
-            for (BulkResponseItem item: result.items()) {
-                if (item.error() != null) {
-                    logger.error(item.error().reason());
-                }
-            }
+        int totalRows = discussPostMapper.selectDiscussPostRows(0);
+        List<DiscussPost> posts = discussPostMapper.selectDiscussPosts(0, 0, totalRows, 0);
+        logger.info("搜索到的帖子数量："+posts.size());
+        this.client = client;
+        for (DiscussPost post : posts) {
+            logger.info("saving : "+post);
+            saveDiscussPost(post);
         }
     }
     public void saveDiscussPost(DiscussPost post) throws IOException {
