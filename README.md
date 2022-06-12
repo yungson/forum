@@ -1,124 +1,54 @@
 
 ## Introduction
-![Architecture of Bee Community Application](https://www.processon.com/view/link/62a577285653bb5256cc92f3)
+This is an online discuss community for teams, groups to share ideas and 
+information efficiently. Let's name it "Bee Community". The application
+demo can be found at  [82.156.26.62](82.156.26.62).
 
 ## Installation
+This forum application can be easily deployed using docker.
 
-A server with >4GB memory is recommended. This forum application can be easily deployed using docker.
-
-### config the environment
-
-### checking the status of each service
-
-## create network
+The application is equipped with single line of command to deploy using docker compose. Download this repo to the server
+and run the following command. Upon completion, visit 82.156.26.62. That's it! 
 
 ```shell
- docker network create -d bridge my-net
+# set your IP and deployment directory accordingly
+# A server with >4GB memory is recommended.
+sh install.sh  82.156.26.62 /project/forum
 ```
 
-Check the status of each docker container as follows
+## Architecture
+![Architecture of Bee Community Application](./doc/architecture.png)
 
-#### mysql
+- The application is equipped with unified access-control and exception handling 
+- Application logs can be recorded using AOP technique
 
-```shell
-root@e7d6d35b87eb:/# mysql -uroot -p
-Enter password: 
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 9
-Server version: 8.0.29 MySQL Community Server - GPL
+## Functions Implemented
+### for common users
+- [x] register/activate using email
+- [x] login/logout
+- [x] kaptcha verification
+- [x] make a post/comment
+- [x] like a post/comment
+- [x] set avatar/change password
+- [x] send private messages
+- [x] user profile page
+- [x] system notifications
+- [x] search for posts
+- [x] follow a user
+- [x] share an application page
+- [x] automatic sensitive words filter
+- [x] automatic rank featured posts
 
-Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+### extras for post administrator
+- [x] pin a post
+- [x] endorse a post
 
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-mysql> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| forum              |
-| information_schema |
-| mysql              |
-| performance_schema |
-| sys                |
-+--------------------+
-5 rows in set (0.00 sec)
-
-mysql>
-```
-Alternatively,  you can navigate to localhost:8081 and login to the adminer portal as `root`
-to check whether the `forum` database exists or not.
-
-#### elastic search
-``` shell
-$curl -X GET "localhost:9200/_cat/nodes?v&pretty"
-ip         heap.percent ram.percent cpu load_1m load_5m load_15m node.role   master name
-172.18.0.3           27          94   1    0.11    0.05     0.08 cdfhilmrstw *      be6aa04613a7
-```
-
-**elastic search plugin(optional)**
-
-check if the additional plugins is correctly mounted. `ik` is a word segmentation tool for chinese. 
-```shell
-$docker exec forum_es ls /usr/share/elasticsearch/plugins/ik
-commons-codec-1.9.jar
-commons-logging-1.2.jar
-config
-elasticsearch-analysis-ik-7.17.3.jar
-elasticsearch-analysis-ik-7.17.3.zip
-httpclient-4.5.2.jar
-httpcore-4.4.4.jar
-plugin-descriptor.properties
-plugin-security.policy
-```
-
-#### Redis
-```shell
-$docker exec -it forum_redis bash 
-root@1612cd80535c:/data# redis-cli
-127.0.0.1:6379> select 1
-OK
-127.0.0.1:6379[1]> set test:count 1
-OK
-127.0.0.1:6379[1]>
-```
+### extras for super administrator
+- [x] UV statistics
+- [x] DAU statistics
+- [x] delete a post
+- [x] application health monitor
 
 
-#### Kafka
-
-```shell
-$docker exec -it forum_kafka bash 
-I have no name!@ea619513946f:/$ kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic test
-Created topic test.
-I have no name!@ea619513946f:/$ kafka-console-producer.sh --broker-list localhost:9092 --topic test
->hello
->world!
->
-```
-
-open another terminal and you will receive two messages `hello` and `world!`
-```shell
-$docker exec -it forum_kafka bash
-I have no name!@ea619513946f:/$ kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
-hello
-world!
-```
-
-### download and packaging
-
-git clone the project and using the command below to package
-```shell
-docker run -it --rm --name my-maven-project -v "$(pwd)":/usr/src/mymaven -w /usr/src/mymaven maven mvn clean package  -Dmaven.test.skip=true
-```
-
-
-You need to set the following environment variables accordingly to make it work
-```shell
- export datasource_password=your_root_password_for_mysql
- export qqmail_authorization_code=your_mail_actuorization_code_or_password
- export qiniu_access_key=your_cdn_access_key
- export qiniu_access_secret=your_cdn_access_secret
-```
+### to do list
+- [x] forget password
